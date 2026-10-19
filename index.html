@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpportunityOS — Explainable Opportunity & Scholarship Matching Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #070912; color: #f1f5f9; }
+    code, pre { font-family: 'Fira Code', monospace; }
+    .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #070912; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scroll">
+
+  <!-- HEADER -->
+  <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
+          🎯
+        </div>
+        <div>
+          <span class="font-bold text-lg text-white tracking-tight">OpportunityOS<span class="text-cyan-400">.Studio</span></span>
+          <span class="hidden sm:inline-block ml-2 text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono">Explainable Constraint-Solver Matching</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <select id="candPresetSelect" onchange="loadCandScenario(this.value)" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-cyan-500 font-medium">
+          <option value="elena">Candidate: Elena Rostova (Strong Match — All Hard Constraints Met)</option>
+          <option value="marcus">Candidate: Marcus Bell (Disqualified — Transparent GPA & Year Reason)</option>
+          <option value="aisha">Candidate: Aisha Patel (International Student — Borderline Skills)</option>
+        </select>
+        <button onclick="evaluateOpportunities()" class="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold shadow-lg shadow-cyan-500/20 transition flex items-center gap-1.5">
+          <span>⚡</span> Audit Eligibility
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN INTERFACE -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- METRICS STRIP -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div class="glass-panel p-3.5 rounded-xl border-slate-800">
+        <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Eligibility Status</div>
+        <div id="stat-status" class="text-lg font-bold text-emerald-400 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> FULLY ELIGIBLE
+        </div>
+      </div>
+      <div class="glass-panel p-3.5 rounded-xl border-slate-800">
+        <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Compatibility Score</div>
+        <div id="stat-score" class="text-lg font-bold text-cyan-400">95 / 100</div>
+      </div>
+      <div class="glass-panel p-3.5 rounded-xl border-slate-800">
+        <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Hard Constraints</div>
+        <div id="stat-hc" class="text-lg font-bold text-emerald-400">3 / 3 Satisfied</div>
+      </div>
+      <div class="glass-panel p-3.5 rounded-xl border-slate-800">
+        <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Stipend / Award</div>
+        <div id="stat-award" class="text-lg font-bold text-emerald-400">$10,000 / mo</div>
+      </div>
+      <div class="glass-panel p-3.5 rounded-xl border-slate-800">
+        <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Explainability</div>
+        <div class="text-lg font-bold text-purple-400">100% Transparent</div>
+      </div>
+    </div>
+
+    <!-- MAIN TWO-COLUMN SPLIT -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: CANDIDATE DOSSIER & CONSTRAINT AUDIT -->
+      <div class="lg:col-span-5 space-y-4">
+        <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <span class="text-xs font-bold text-white uppercase tracking-wider">Candidate Profile & Attributes</span>
+              <p class="text-xs text-slate-400" id="candName">Elena Rostova</p>
+            </div>
+            <span class="text-xs font-mono text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800" id="candId">cand-001</span>
+          </div>
+
+          <div class="space-y-3 font-mono text-xs">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <span class="text-slate-400 text-[10px] uppercase block">Academic GPA</span>
+                <span class="text-white font-bold" id="candGpa">3.85 / 4.0</span>
+              </div>
+              <div>
+                <span class="text-slate-400 text-[10px] uppercase block">Graduation Year</span>
+                <span class="text-white font-bold" id="candYear">2026 (Junior)</span>
+              </div>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[10px] uppercase block">Citizenship / Work Authorization</span>
+              <span class="text-cyan-400 font-semibold" id="candCitizen">US Citizen</span>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[10px] uppercase block">Skills Inventory</span>
+              <div class="flex flex-wrap gap-1.5 pt-1" id="candSkills">
+                <!-- Tags -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: EXPLAINABLE OPPORTUNITY MATCH FEED -->
+      <div class="lg:col-span-7 space-y-4">
+        <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+              <span>📋</span> Evaluated Opportunity Breakdown
+            </span>
+            <span class="text-[10px] font-mono text-slate-400" id="evalCount">Opportunity #opp-ai-intern</span>
+          </div>
+
+          <!-- TARGET LISTING DOSSIER -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-white" id="listingTitle">AI Research Engineering Intern</h3>
+                <span class="text-xs text-cyan-400" id="listingOrg">DeepTech Labs (San Francisco, CA)</span>
+              </div>
+              <span class="px-2.5 py-1 rounded text-xs font-mono font-bold" id="listingStatusBadge">FULLY ELIGIBLE</span>
+            </div>
+
+            <!-- EXPLAINABILITY RATIONALE BANNER -->
+            <div class="p-3.5 rounded-lg border text-xs leading-relaxed" id="explanationBox">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- HARD CONSTRAINTS CHECKLIST -->
+            <div class="space-y-2 pt-2 border-t border-slate-800">
+              <span class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Hard Constraints Verification Audit</span>
+              <div class="space-y-1.5 text-xs font-mono" id="constraintsAuditList">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    const CANDIDATES = {
+      elena: {
+        name: "Elena Rostova",
+        id: "cand-001",
+        gpa: "3.85 / 4.0",
+        year: "2026 (Junior)",
+        citizen: "US Citizen",
+        skills: ["Python", "PyTorch", "Distributed Systems", "FastAPI"],
+        status: "FULLY ELIGIBLE",
+        statusColor: "emerald",
+        score: "95 / 100",
+        hcText: "3 / 3 Satisfied",
+        award: "$10,000 / mo",
+        listingTitle: "AI Research Engineering Intern",
+        listingOrg: "DeepTech Labs (San Francisco, CA)",
+        explanation: "Strong match: Meets all academic, graduation date, and citizenship constraints. Matches 3 of 3 preferred core technical competencies (Python, PyTorch, Distributed Systems).",
+        expBg: "bg-emerald-950/30 border-emerald-800/60 text-emerald-300",
+        constraints: [
+          { name: "Minimum GPA >= 3.5", passed: true, detail: "Candidate GPA 3.85 exceeds requirement." },
+          { name: "Graduation Class [2026, 2027]", passed: true, detail: "Class of 2026 satisfies eligibility window." },
+          { name: "Work Authorization [US_CITIZEN, PR]", passed: true, detail: "US Citizen satisfies export compliance rules." }
+        ]
+      },
+      marcus: {
+        name: "Marcus Bell",
+        id: "cand-002",
+        gpa: "3.10 / 4.0",
+        year: "2025 (Senior)",
+        citizen: "INTERNATIONAL (F-1 Visa)",
+        skills: ["Python", "HTML/CSS"],
+        status: "DISQUALIFIED",
+        statusColor: "red",
+        score: "0 / 100",
+        hcText: "0 / 3 Satisfied",
+        award: "$25,000 Award",
+        listingTitle: "Aerospace Defense Research Fellowship",
+        listingOrg: "NASA Space Grant Consortium",
+        explanation: "Disqualified with transparent rationale: Disqualified on 3 distinct hard constraints. We explain this upfront to save you hours filling out doomed applications.",
+        expBg: "bg-red-950/40 border-red-800/60 text-red-300",
+        constraints: [
+          { name: "Minimum GPA >= 3.5", passed: false, detail: "Candidate GPA 3.10 falls below strict 3.5 requirement." },
+          { name: "Graduation Class [2026, 2027]", passed: false, detail: "Class of 2025 graduated prior to cohort commencement." },
+          { name: "Citizenship [US_CITIZEN]", passed: false, detail: "Defense grant strictly requires US citizenship for security clearance." }
+        ]
+      },
+      aisha: {
+        name: "Aisha Patel",
+        id: "cand-003",
+        gpa: "3.75 / 4.0",
+        year: "2026 (Junior)",
+        citizen: "INTERNATIONAL (CPT Eligible)",
+        skills: ["Python", "Pandas"],
+        status: "BORDERLINE ELIGIBLE",
+        statusColor: "amber",
+        score: "60 / 100",
+        hcText: "3 / 3 Satisfied",
+        award: "$8,500 / mo",
+        listingTitle: "Quantitative Analytics Summer Analyst",
+        listingOrg: "Apex Financial Strategies",
+        explanation: "Borderline match: Satisfies all hard legal & academic requirements (sponsors CPT/OPT). However, candidate matches only 1 of 3 specialized technical skills (missing C++ and Stochastic Calculus).",
+        expBg: "bg-amber-950/30 border-amber-800/60 text-amber-300",
+        constraints: [
+          { name: "Minimum GPA >= 3.5", passed: true, detail: "Candidate GPA 3.75 exceeds 3.5 requirement." },
+          { name: "Graduation Class [2026]", passed: true, detail: "Graduation year matches cohort." },
+          { name: "Work Authorization [All Welcome]", passed: true, detail: "Employer sponsors CPT/OPT visas." }
+        ]
+      }
+    };
+
+    let currentCandKey = 'elena';
+
+    function loadCandScenario(key) {
+      currentCandKey = key;
+      updateUI();
+    }
+
+    function evaluateOpportunities() {
+      updateUI();
+    }
+
+    function updateUI() {
+      const data = CANDIDATES[currentCandKey];
+
+      const statStatus = document.getElementById('stat-status');
+      statStatus.className = `text-lg font-bold text-${data.statusColor}-400 flex items-center gap-1.5`;
+      statStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-${data.statusColor}-400 animate-pulse"></span> ${data.status}`;
+
+      document.getElementById('stat-score').innerText = data.score;
+      document.getElementById('stat-hc').innerText = data.hcText;
+      document.getElementById('stat-award').innerText = data.award;
+
+      document.getElementById('candName').innerText = data.name;
+      document.getElementById('candId').innerText = data.id;
+      document.getElementById('candGpa').innerText = data.gpa;
+      document.getElementById('candYear').innerText = data.year;
+      document.getElementById('candCitizen').innerText = data.citizen;
+
+      document.getElementById('candSkills').innerHTML = data.skills.map(s => `
+        <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[10px] text-cyan-300">${s}</span>
+      `).join('');
+
+      document.getElementById('listingTitle').innerText = data.listingTitle;
+      document.getElementById('listingOrg').innerText = data.listingOrg;
+
+      const badge = document.getElementById('listingStatusBadge');
+      badge.className = `px-2.5 py-1 rounded text-xs font-mono font-bold bg-${data.statusColor}-950 text-${data.statusColor}-400 border border-${data.statusColor}-800`;
+      badge.innerText = data.status;
+
+      const expBox = document.getElementById('explanationBox');
+      expBox.className = `p-3.5 rounded-lg border text-xs leading-relaxed ${data.expBg}`;
+      expBox.innerText = data.explanation;
+
+      document.getElementById('constraintsAuditList').innerHTML = data.constraints.map(c => `
+        <div class="flex items-center justify-between p-2 rounded bg-slate-950 border border-slate-800">
+          <span class="text-slate-300">${c.name}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-slate-400">${c.detail}</span>
+            <span class="${c.passed ? 'text-emerald-400' : 'text-red-400'} font-bold">${c.passed ? '✓ PASS' : '✗ FAIL'}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Initialize
+    updateUI();
+  </script>
+</body>
+</html>

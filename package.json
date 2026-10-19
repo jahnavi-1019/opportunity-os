@@ -1,0 +1,27 @@
+{
+  "name": "@portfolio/opportunity-os",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Explainable opportunity-matching engine for internships and scholarships with transparent constraint verification",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node --test dist/*.test.js",
+    "ui": "npx serve -l 3000 ."
+  },
+  "keywords": [
+    "opportunity-matching",
+    "explainable-ai",
+    "constraint-satisfaction",
+    "scholarships",
+    "internships",
+    "eligibility-engine"
+  ],
+  "author": "Antigravity Engineering",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}
